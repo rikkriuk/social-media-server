@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Profile } from './profile.model';
+import { User } from '../users/user.model';
+import { Op } from 'sequelize';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 
@@ -12,11 +14,15 @@ export class ProfileService {
     return this.profileModel.create({ userId, ...dto });
   }
 
-  async findAll(filter: { userId?: number; name?: string }) {
+  async findAll(filter: { userId?: number; name?: string; username?: string }) {
     const where: any = {};
+    const include: any = [];
     if (filter.userId) where.userId = filter.userId;
     if (filter.name) where.name = filter.name;
-    return this.profileModel.findAll({ where });
+    if (filter.username) {
+      include.push({ model: User, where: { username: { [Op.iLike]: `%${filter.username}%` } }, attributes: ['uuid', 'username'] });
+    }
+    return this.profileModel.findAll({ where, include });
   }
 
   async findOne(id: number) {

@@ -11,10 +11,11 @@ export class ProfileController {
 
   @Get()
   @ApiOperation({ summary: 'List profiles (filter by userId or name)' })
-  async list(@Query('userId') userId: string, @Query('name') name: string) {
+  async list(@Query('userId') userId: string, @Query('name') name: string, @Query('username') username: string) {
     const filter: any = {};
     if (userId) filter.userId = parseInt(userId, 10);
     if (name) filter.name = name;
+    if (username) filter.username = username;
     return this.service.findAll(filter);
   }
 

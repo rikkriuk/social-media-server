@@ -2,11 +2,8 @@ import { Table, Column, Model, DataType } from 'sequelize-typescript';
 
 @Table({ tableName: 'users', timestamps: false, underscored: true })
 export class User extends Model {
-  @Column({ primaryKey: true, autoIncrement: true, type: DataType.INTEGER })
-  id: number;
-
-  @Column({ type: DataType.UUID, allowNull: false, unique: true, defaultValue: DataType.UUIDV4 })
-  uuid: string;
+  @Column({ primaryKey: true, type: DataType.UUID, defaultValue: DataType.UUIDV4 })
+  id: string;
 
   @Column({ type: DataType.STRING, allowNull: true })
   email: string;
@@ -19,6 +16,9 @@ export class User extends Model {
 
   @Column({ type: DataType.STRING, allowNull: true })
   password: string;
+
+  @Column({ field: 'is_verified', type: DataType.BOOLEAN, defaultValue: false })
+  isVerified: boolean;
 
   @Column({ field: 'created_at', type: DataType.DATE })
   createdAt: Date;

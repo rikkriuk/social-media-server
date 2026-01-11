@@ -5,6 +5,8 @@ import { LoginDto } from './dto/login.dto';
 import { VerifyDto } from './dto/verify.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { ResendDto } from './dto/resend.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 class TokenResponse {
   token: string;
@@ -35,8 +37,8 @@ export class AuthController {
   @ApiOperation({ summary: 'Login with email/phone/username and password' })
   @ApiBody({ type: LoginDto })
   @ApiResponse({ status: 200, description: 'Returns JWT token', type: TokenResponse })
-  async login(@Body() dto: LoginDto) {
-    return this.authService.login(dto.identifier, dto.password);
+  async login(@Body() data: LoginDto) {
+    return this.authService.login(data);
   }
 
   @Post('logout')
@@ -53,5 +55,21 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'OTP resent (returned for dev)' })
   async resend(@Body() dto: ResendDto) {
     return this.authService.resendOtp(dto.userId);
+  }
+
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Request password reset (sends OTP)' })
+  @ApiBody({ type: ForgotPasswordDto })
+  @ApiResponse({ status: 200, description: 'OTP created for reset (dev returns code)' })
+  async forgot(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto.identifier);
+  }
+
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Reset password using OTP' })
+  @ApiBody({ type: ResetPasswordDto })
+  @ApiResponse({ status: 200, description: 'Password reset and token returned' })
+  async reset(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto.userId, dto.code, dto.newPassword);
   }
 }

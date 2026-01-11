@@ -7,8 +7,8 @@ export class OtpCode extends Model {
   id: number;
 
   @ForeignKey(() => User)
-  @Column({ field: 'user_id', type: DataType.INTEGER })
-  userId: number;
+  @Column({ field: 'user_id', type: DataType.UUID })
+  userId: string;
 
   @Column({ type: DataType.STRING(6) })
   code: string;

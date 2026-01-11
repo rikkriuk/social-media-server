@@ -1,8 +1,12 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Req } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ProfileFilterDto } from './dto/profile-filter.dto';
+import { paginateResponse } from '../../common/response.helper';
+import { Request } from 'express';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiProfileQuery } from './dto/profile-filter.dto';
 
 @ApiTags('Profile')
 @Controller('profiles')
@@ -11,12 +15,11 @@ export class ProfileController {
 
   @Get()
   @ApiOperation({ summary: 'List profiles (filter by userId or name)' })
-  async list(@Query('userId') userId: string, @Query('name') name: string, @Query('username') username: string) {
-    const filter: any = {};
-    if (userId) filter.userId = parseInt(userId, 10);
-    if (name) filter.name = name;
-    if (username) filter.username = username;
-    return this.service.findAll(filter);
+  @ApiProfileQuery()
+  async list(@Req() req: Request, @Query() filter: ProfileFilterDto) {
+    const result = (await this.service.findAll(filter as any, true)) as any;
+    const { rows, count, limit, offset } = result;
+    return paginateResponse(req, rows, count, limit || 50, offset || 0);
   }
 
   @Get(':id')

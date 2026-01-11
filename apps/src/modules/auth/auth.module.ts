@@ -5,10 +5,11 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { User } from '../users/user.model';
 import { OtpCode } from '../otp/otp.model';
+import { Profile } from '../profile/profile.model';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([User, OtpCode]),
+    SequelizeModule.forFeature([User, OtpCode, Profile]),
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'change_this_secret',
       signOptions: { expiresIn: '7d' },

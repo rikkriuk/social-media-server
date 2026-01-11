@@ -1,4 +1,4 @@
-import { Table, Column, Model, DataType, ForeignKey } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, ForeignKey, HasOne, BelongsTo } from 'sequelize-typescript';
 import { User } from '../users/user.model';
 
 @Table({ tableName: 'profile', timestamps: false, underscored: true })
@@ -7,8 +7,8 @@ export class Profile extends Model {
   id: number;
 
   @ForeignKey(() => User)
-  @Column({ field: 'user_id', type: DataType.INTEGER })
-  userId: number;
+  @Column({ field: 'user_id', type: DataType.UUID })
+  userId: string;
 
   @Column({ type: DataType.STRING })
   name: string;
@@ -27,4 +27,7 @@ export class Profile extends Model {
 
   @Column({ field: 'updated_at', type: DataType.DATE })
   updatedAt: Date;
+  
+  @BelongsTo(() => User)
+  user: User;
 }

@@ -10,19 +10,31 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 export class ProfileService {
   constructor(@InjectModel(Profile) private profileModel: typeof Profile) {}
 
-  async create(userId: number, dto: CreateProfileDto) {
+  async create(userId: string, dto: CreateProfileDto) {
     return this.profileModel.create({ userId, ...dto });
   }
 
-  async findAll(filter: { userId?: number; name?: string; username?: string }) {
+  async findAll(
+    filter: { userId?: string; name?: string; username?: string; limit?: number; offset?: number },
+    paginate = false,
+  ) {
     const where: any = {};
-    const include: any = [];
     if (filter.userId) where.userId = filter.userId;
-    if (filter.name) where.name = filter.name;
+    if (filter.name) where.name = { [Op.iLike]: `%${filter.name}%` };
+
+    const userInclude: any = { model: User, attributes: ['id', 'username', 'email'] };
     if (filter.username) {
-      include.push({ model: User, where: { username: { [Op.iLike]: `%${filter.username}%` } }, attributes: ['uuid', 'username'] });
+      userInclude.where = { username: { [Op.iLike]: `%${filter.username}%` } };
     }
-    return this.profileModel.findAll({ where, include });
+
+    if (!paginate) {
+      return this.profileModel.findAll({ where, include: [userInclude] });
+    }
+
+    const limit = filter.limit || 50;
+    const offset = filter.offset || 0;
+    const result = await this.profileModel.findAndCountAll({ where, include: [userInclude], limit, offset });
+    return { rows: result.rows, count: result.count, limit, offset };
   }
 
   async findOne(id: number) {

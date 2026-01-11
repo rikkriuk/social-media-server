@@ -6,9 +6,13 @@ import { OtpCode } from './modules/otp/otp.model';
 import { Profile } from './modules/profile/profile.model';
 import { ProfileModule } from './modules/profile/profile.module';
 import { UsersModule } from './modules/users/users.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     SequelizeModule.forRoot({
       dialect: 'postgres',
       host: process.env.DB_HOST || 'localhost',

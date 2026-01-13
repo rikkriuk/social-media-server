@@ -112,7 +112,19 @@ export class AuthService {
     }
 
     if (!user.isVerified) {
-      throw new HttpException('User not verified. Please verify your account.', HttpStatus.FORBIDDEN);
+      const { code, expiresAt } = generateOtp();
+
+      await this.otpModel.create({
+        userId: user.id,
+        code,
+        expiresAt,
+      });
+
+      return {
+        requiresVerification: true,
+        userId: user.id,
+        otp: code
+      };
     }
 
     const match = await bcrypt.compare(password, user.password);

@@ -36,9 +36,9 @@ export class AuthService {
 
     // create OTP
     const otp = generateOtp();
-    await this.otpModel.create({ 
-      userId: user.id, 
-      otp: otp.code,
+    await this.otpModel.create({
+      userId: user.id,
+      code: otp.code,
       expiresAt: otp.expiresAt,
     });
 
@@ -60,8 +60,8 @@ export class AuthService {
       } 
     });
 
-    console.log("OTP:", otp);
-    await this.getValidOtpOrFail(user.id, code);
+    console.log("OTP:", otp,user.id, code);
+    await this.getValidOtpOrFail(otp);
 
     otp.verified = true;
     otp.used = true;
@@ -232,10 +232,7 @@ export class AuthService {
     }
   }
 
-  private async getValidOtpOrFail(userId: string, code: string) {
-    const otp = await this.otpModel.findOne({
-      where: { userId, code },
-    });
+  private async getValidOtpOrFail(otp: any) {
 
     if (!otp) {
       throw new HttpException('Invalid OTP', HttpStatus.BAD_REQUEST);

@@ -1,12 +1,12 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { InjectModel } from '@nestjs/sequelize';
-import { User } from '../users/user.model';
-import { OtpCode } from '../otp/otp.model';
-import * as bcrypt from 'bcrypt';
-import { IdentifierType, LoginDto } from './dto/login.dto';
-import { generateOtp } from 'apps/src/helpers/otp';
-import { Profile } from '../profile/profile.model';
+import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { InjectModel } from "@nestjs/sequelize";
+import { User } from "../users/user.model";
+import { OtpCode } from "../otp/otp.model";
+import * as bcrypt from "bcrypt";
+import { IdentifierType, LoginDto } from "./dto/login.dto";
+import { generateOtp } from "apps/src/helpers/otp";
+import { Profile } from "../profile/profile.model";
 
 const tokenBlacklist = new Set<string>();
 
@@ -48,7 +48,7 @@ export class AuthService {
   async verifyOtp(userId: string, code: string) {
     const user = await this.userModel.findOne({ where: { id: userId } });
     if (!user) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      throw new HttpException("User not found", HttpStatus.NOT_FOUND);
     };
 
     const otp = await this.otpModel.findOne({ 
@@ -137,7 +137,11 @@ export class AuthService {
   async resendOtp(userId: string) {
     const user = await this.userModel.findOne({ where: { id: userId } });
     if (!user) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      throw new HttpException("User not found", HttpStatus.NOT_FOUND);
+    }
+
+    if (user.isVerified) {
+      throw new HttpException("User is already verified", HttpStatus.BAD_REQUEST);
     }
 
     const { code, expiresAt } = generateOtp();
@@ -170,7 +174,7 @@ export class AuthService {
 
   async listUsers() {
     const users = await this.userModel.findAll({ 
-      attributes: ['id', 'email', 'phoneNumber', 'username', 'createdAt'] 
+      attributes: ["id", "email", "phoneNumber", "username", "createdAt"] 
     });
     return users;
   }
@@ -237,8 +241,8 @@ export class AuthService {
 
   private prettyFieldName(field: string) {
     switch (field) {
-      case 'phoneNumber':
-        return 'Phone number';
+      case "phoneNumber":
+        return "Phone number";
       default:
         return field.charAt(0).toUpperCase() + field.slice(1);
     }
@@ -247,15 +251,15 @@ export class AuthService {
   private async getValidOtpOrFail(otp: any) {
 
     if (!otp) {
-      throw new HttpException('Invalid OTP', HttpStatus.BAD_REQUEST);
+      throw new HttpException("Invalid OTP", HttpStatus.BAD_REQUEST);
     }
 
     if (otp.verified) {
-      throw new HttpException('OTP already verified', HttpStatus.BAD_REQUEST);
+      throw new HttpException("OTP already verified", HttpStatus.BAD_REQUEST);
     }
 
     if (otp.expiresAt < new Date()) {
-      throw new HttpException('OTP expired', HttpStatus.BAD_REQUEST);
+      throw new HttpException("OTP expired", HttpStatus.BAD_REQUEST);
     }
 
     return otp;

@@ -92,7 +92,7 @@ export class AuthService {
 
       user = await this.userModel.findOne({ where: whereClause });
       if (!user) {
-        throw new HttpException(`Invalid ${identifier} or Password`, HttpStatus.BAD_REQUEST);
+        throw new HttpException(`Invalid ${identifierType} or Password`, HttpStatus.BAD_REQUEST);
       }
     }
 
@@ -114,7 +114,7 @@ export class AuthService {
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
-      throw new HttpException(`Invalid ${identifier} or Password`, HttpStatus.BAD_REQUEST);
+      throw new HttpException(`Invalid ${identifierType} or Password`, HttpStatus.BAD_REQUEST);
     };
 
     const token = this.jwtService.sign({ sub: user.id });

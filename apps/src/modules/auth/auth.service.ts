@@ -84,38 +84,25 @@ export class AuthService {
   async login(data: LoginDto) {
     const { identifier, identifierType, password } = data;
 
-    let user = null;
+    const user = await this.findUserByIdentifier(
+      identifier,
+      identifierType,
+      new HttpException(
+        `Invalid ${identifierType} or Password`,
+        HttpStatus.BAD_REQUEST,
+      ),
+    );
 
-    if (identifierType) {
-      let whereClause = {};
-      whereClause = this.getIdentifierType(identifier, identifierType, whereClause);
-
-      user = await this.userModel.findOne({ where: whereClause });
-      if (!user) {
-        throw new HttpException(`Invalid ${identifierType} or Password`, HttpStatus.BAD_REQUEST);
-      }
-    }
-
-    if (!user.isVerified) {
-      const { code, expiresAt } = generateOtp();
-
-      await this.otpModel.create({
-        userId: user.id,
-        code,
-        expiresAt,
-      });
-
-      return {
-        requiresVerification: true,
-        userId: user.id,
-        otp: code
-      };
-    }
+    const unverified = await this.handleUnverifiedUser(user);
+    if (unverified) return unverified;
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
-      throw new HttpException(`Invalid ${identifierType} or Password`, HttpStatus.BAD_REQUEST);
-    };
+      throw new HttpException(
+        `Invalid ${identifierType} or Password`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
 
     const token = this.jwtService.sign({ sub: user.id });
     return { token };
@@ -169,26 +156,21 @@ export class AuthService {
   async forgotPassword(data: ForgotPasswordDto) {
     const { identifierType, identifier } = data;
 
-    let user: any;
+    const user = await this.findUserByIdentifier(
+      identifier,
+      identifierType,
+      new HttpException("User not found!", HttpStatus.NOT_FOUND),
+    );
 
-    if (identifierType) {
-      let whereClause = {};
-      whereClause = this.getIdentifierType(identifier, identifierType, whereClause);
+    const unverified = await this.handleUnverifiedUser(user);
+    if (unverified) return unverified;
 
-      user = await this.userModel.findOne({ where: whereClause });
-      if (!user) {
-        throw new HttpException("User not found!", HttpStatus.NOT_FOUND);
-      }
-    }
+    const { code } = await this.createOtpForUser(user.id);
 
-    const otp = generateOtp();
-    await this.otpModel.create({
+    return {
       userId: user.id,
-      code: otp.code,
-      expiresAt: otp.expiresAt,
-    });
-
-    return { userId: user.id, otp: otp.code };
+      otp: code,
+    };
   }
 
   // Reset password using OTP
@@ -276,6 +258,47 @@ export class AuthService {
     }
 
     return whereClause; 
+  }
+
+  private async findUserByIdentifier(
+    identifier: string,
+    identifierType: IdentifierType,
+    notFoundError: HttpException,
+  ) {
+    const whereClause = this.getIdentifierType(identifier, identifierType, {});
+    const user = await this.userModel.findOne({ where: whereClause });
+
+    if (!user) {
+      throw notFoundError;
+    }
+
+    return user;
+  }
+
+  private async createOtpForUser(userId: string) {
+    const { code, expiresAt } = generateOtp();
+
+    await this.otpModel.create({
+      userId,
+      code,
+      expiresAt,
+    });
+
+    return { code, expiresAt };
+  }
+
+  private async handleUnverifiedUser(user: User) {
+    if (user.isVerified) {
+      throw new HttpException("User is already verified", HttpStatus.BAD_REQUEST);
+    };
+
+    const { code } = await this.createOtpForUser(user.id);
+
+    return {
+      requiresVerification: true,
+      userId: user.id,
+      otp: code,
+    };
   }
 
   logout(token: string) {

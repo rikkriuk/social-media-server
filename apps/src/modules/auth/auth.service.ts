@@ -260,7 +260,7 @@ export class AuthService {
     return otp;
   }
 
-  private async getIdentifierType(identifier, identifierType, whereClause) {
+  private getIdentifierType(identifier, identifierType, whereClause) {
     switch (identifierType) {
       case IdentifierType.EMAIL:
         whereClause = { email: identifier };

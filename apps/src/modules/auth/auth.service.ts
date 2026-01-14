@@ -288,9 +288,7 @@ export class AuthService {
   }
 
   private async handleUnverifiedUser(user: User) {
-    if (user.isVerified) {
-      throw new HttpException("User is already verified", HttpStatus.BAD_REQUEST);
-    };
+    if (user.isVerified) return null;
 
     const { code } = await this.createOtpForUser(user.id);
 

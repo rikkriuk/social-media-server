@@ -62,7 +62,7 @@ export class AuthController {
   @ApiBody({ type: ForgotPasswordDto })
   @ApiResponse({ status: 200, description: 'OTP created for reset (dev returns code)' })
   async forgot(@Body() dto: ForgotPasswordDto) {
-    return this.authService.forgotPassword(dto.identifier);
+    return this.authService.forgotPassword(dto);
   }
 
   @Post('reset-password')

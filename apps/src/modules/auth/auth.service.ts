@@ -175,7 +175,7 @@ export class AuthService {
 
       user = await this.userModel.findOne({ where: whereClause });
       if (!user) {
-        throw new HttpException(`Invalid ${identifier} or Password`, HttpStatus.BAD_REQUEST);
+        throw new HttpException("User not found!", HttpStatus.NOT_FOUND);
       }
     }
 

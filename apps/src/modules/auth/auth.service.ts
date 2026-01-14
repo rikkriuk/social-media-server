@@ -113,7 +113,9 @@ export class AuthService {
     }
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return null;
+    if (!match) {
+      throw new HttpException(`Invalid ${identifier} or Password`, HttpStatus.BAD_REQUEST);
+    };
 
     const token = this.jwtService.sign({ sub: user.id });
     return { token };

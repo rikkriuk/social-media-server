@@ -7,6 +7,7 @@ import * as bcrypt from "bcrypt";
 import { IdentifierType, LoginDto } from "./dto/login.dto";
 import { generateOtp } from "apps/src/helpers/otp";
 import { Profile } from "../profile/profile.model";
+import { ForgotPasswordDto } from "./dto/forgot-password.dto";
 
 const tokenBlacklist = new Set<string>();
 
@@ -85,25 +86,9 @@ export class AuthService {
 
     let user = null;
 
-    const getIdentifierType = (identifierType, whereClause) => {
-      switch (identifierType) {
-        case IdentifierType.EMAIL:
-          whereClause = { email: identifier };
-          break;
-        case IdentifierType.PHONE:
-          whereClause = { phoneNumber: identifier };
-          break;
-        case IdentifierType.USERNAME:
-          whereClause = { username: identifier };
-          break;
-      }
-
-      return whereClause;
-    }
-
     if (identifierType) {
       let whereClause = {};
-      whereClause = getIdentifierType(identifierType, whereClause);
+      whereClause = this.getIdentifierType(identifier, identifierType, whereClause);
 
       user = await this.userModel.findOne({ where: whereClause });
       if (!user) {
@@ -179,19 +164,29 @@ export class AuthService {
     return users;
   }
 
-  // Forgot password: generate OTP and (for dev) return it. In prod, send via email/SMS.
-  async forgotPassword(identifier: string) {
-    const byEmail = await this.userModel.findOne({ where: { email: identifier } });
-    const byPhone = await this.userModel.findOne({ where: { phoneNumber: identifier } });
-    const user = byEmail || byPhone;
-    if (!user) return null;
+  async forgotPassword(data: ForgotPasswordDto) {
+    const { identifierType, identifier } = data;
 
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
-    await this.otpModel.create({ userId: user.id, code, expiresAt });
+    let user: any;
 
-    // In production, send code via email/SMS. For now return for dev/testing.
-    return { userId: user.id, otp: code };
+    if (identifierType) {
+      let whereClause = {};
+      whereClause = this.getIdentifierType(identifier, identifierType, whereClause);
+
+      user = await this.userModel.findOne({ where: whereClause });
+      if (!user) {
+        throw new HttpException(`Invalid ${identifier} or Password`, HttpStatus.BAD_REQUEST);
+      }
+    }
+
+    const otp = generateOtp();
+    await this.otpModel.create({
+      userId: user.id,
+      code: otp.code,
+      expiresAt: otp.expiresAt,
+    });
+
+    return { userId: user.id, otp: otp.code };
   }
 
   // Reset password using OTP
@@ -263,6 +258,22 @@ export class AuthService {
     }
 
     return otp;
+  }
+
+  private async getIdentifierType(identifier, identifierType, whereClause) {
+    switch (identifierType) {
+      case IdentifierType.EMAIL:
+        whereClause = { email: identifier };
+        break;
+      case IdentifierType.PHONE:
+        whereClause = { phoneNumber: identifier };
+        break;
+      case IdentifierType.USERNAME:
+        whereClause = { username: identifier };
+        break;
+    }
+
+    return whereClause; 
   }
 
   logout(token: string) {

@@ -42,7 +42,16 @@ async function bootstrap() {
     `,
   });
 
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
 
   await app.listen(process.env.PORT || 3001);
   console.log(`Server running on http://localhost:${process.env.PORT || 3001}`);

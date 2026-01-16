@@ -69,12 +69,9 @@ export class AuthService {
     await otp.save();
 
     const profile = await this.profileModel.findOne({ where: { userId: user.id } });
-    console.log('Profile found before create:', profile);
     
     if (!profile) {
-      console.log('Profile not found, creating one...');
-      const newProfile = await this.profileModel.create({ userId: user.id });
-      console.log('Profile created:', newProfile);
+      await this.profileModel.create({ userId: user.id });
     }
 
     this.userModel.update({ isVerified: true }, { 
@@ -82,17 +79,15 @@ export class AuthService {
     });
 
     const profileData = await this.profileModel.findOne({ where: { userId: user.id } });
-    console.log('Final profile fetched:', profileData);
-    console.log('Profile data ID:', profileData?.id);
     
     const payload = {
       userId: user.id,
       profileId: profileData?.id,
       email: user.email,
     };
-    console.log('Signing JWT with payload:', payload);
     
     const token = this.jwtService.sign(payload);
+    
     return { userId: user.id, token };
   }
 
@@ -120,11 +115,12 @@ export class AuthService {
     }
 
     const profile = await this.profileModel.findOne({ where: { userId: user.id } });
-    const token = this.jwtService.sign({ 
+    const payload = {
       userId: user.id,
       profileId: profile?.id,
       email: user.email,
-    });
+    };
+    const token = this.jwtService.sign(payload);
     return { token };
   }
 

@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsString, IsOptional, IsArray } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsString, IsOptional, IsArray, IsNumber } from 'class-validator';
 
 export class CreatePostDto {
    @IsString()
@@ -69,6 +69,9 @@ export class PostResponseDto {
 }
 
 export class PaginationQueryDto {
+   @IsOptional()
+   @Type(() => Number)
+   @IsNumber()
    @ApiPropertyOptional({
       description: 'Number of items per page',
       example: 10,
@@ -76,6 +79,9 @@ export class PaginationQueryDto {
    })
    limit?: number = 10;
 
+   @IsOptional()
+   @Type(() => Number)
+   @IsNumber()
    @ApiPropertyOptional({
       description: 'Number of items to skip',
       example: 0,

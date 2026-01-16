@@ -2,13 +2,13 @@ import {
   Controller,
   Get,
   Post,
-  Put,
   Delete,
   Body,
   Param,
   Query,
   UseGuards,
   Request,
+  Patch,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
@@ -60,7 +60,7 @@ export class PostController {
       return this.postService.getPostById(id);
    }
 
-   @Put(':id')
+   @Patch(':id')
    @UseGuards(AuthGuard('jwt'))
    @ApiBearerAuth()
    @UpdatePostResponse()

@@ -14,11 +14,11 @@ export class PostService {
       try {
          console.log('Creating post for profileId:', profileId, 'with data:', createPostDto);
          const post = await this.postModel.create({
-            profile_id: profileId,
+            profileId,
             content: createPostDto.content,
-            media_ids: createPostDto.mediaIds || [],
-            likes_count: 0,
-            comments_count: 0,
+            mediaIds: createPostDto.mediaIds || [],
+            likesCount: 0,
+            commentsCount: 0,
          });
 
          return post;

@@ -15,7 +15,10 @@ import { Profile } from '../profile/profile.model';
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'change_this_secret',
-      signOptions: { expiresIn: '7d' },
+      signOptions: { 
+        expiresIn: '7d',
+        noTimestamp: false,
+      },
     }),
   ],
   providers: [AuthService, JwtStrategy],

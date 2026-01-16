@@ -7,7 +7,11 @@ import { Profile } from './modules/profile/profile.model';
 import { ProfileModule } from './modules/profile/profile.module';
 import { UsersModule } from './modules/users/users.module';
 import { ConfigModule } from '@nestjs/config';
-
+import { PostModule } from './modules/post/post.module';
+import { Post } from './modules/post/post.entity';
+import { Like } from './modules/like/like.entity';
+import { Comment } from './modules/comment/comment.entity';
+import { Notification } from './modules/notification/notification.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -20,13 +24,14 @@ import { ConfigModule } from '@nestjs/config';
       username: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASS || 'postgres',
       database: process.env.DB_NAME || 'social_media',
-      models: [User, OtpCode, Profile],
+      models: [User, OtpCode, Profile, Post, Like, Comment, Notification],
       autoLoadModels: true,
       synchronize: true,
     }),
     AuthModule,
     UsersModule,
     ProfileModule,
+    PostModule,
   ],
 })
 export class AppModule {}

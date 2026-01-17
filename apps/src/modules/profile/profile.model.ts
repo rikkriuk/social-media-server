@@ -1,10 +1,10 @@
-import { Table, Column, Model, DataType, ForeignKey, HasOne, BelongsTo } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, ForeignKey, HasOne, BelongsTo, CreatedAt, UpdatedAt } from 'sequelize-typescript';
 import { User } from '../users/user.model';
 
-@Table({ tableName: 'profile', timestamps: false, underscored: true })
+@Table({ tableName: 'profile', timestamps: true, underscored: true })
 export class Profile extends Model {
-  @Column({ primaryKey: true, autoIncrement: true, type: DataType.INTEGER })
-  id: number;
+  @Column({ primaryKey: true, autoIncrement: true, type: DataType.UUID, defaultValue: DataType.UUIDV4 })
+  id: string;
 
   @ForeignKey(() => User)
   @Column({ field: 'user_id', type: DataType.UUID })
@@ -12,6 +12,9 @@ export class Profile extends Model {
 
   @Column({ type: DataType.STRING })
   name: string;
+
+  @Column({ type: DataType.STRING })
+  bio: string;
 
   @Column({ type: DataType.STRING })
   location: string;
@@ -22,10 +25,12 @@ export class Profile extends Model {
   @Column({ type: DataType.STRING })
   gender: string;
 
-  @Column({ field: 'created_at', type: DataType.DATE })
+  @CreatedAt
+  @Column({ field: 'created_at', type: DataType.DATE, defaultValue: DataType.NOW })
   createdAt: Date;
 
-  @Column({ field: 'updated_at', type: DataType.DATE })
+  @UpdatedAt
+  @Column({ field: 'updated_at', type: DataType.DATE, defaultValue: DataType.NOW })
   updatedAt: Date;
   
   @BelongsTo(() => User)

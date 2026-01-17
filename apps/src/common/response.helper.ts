@@ -36,3 +36,23 @@ export function singleResponse(obj: any) {
     payload: obj,
   };
 }
+
+export interface PaginatedResult<T> {
+  rows: T[];
+  count: number;
+  limit: number;
+  offset: number;
+}
+
+export function paginatedResult<T>(
+  result: { rows: T[]; count: number },
+  limit: number,
+  offset: number,
+): PaginatedResult<T> {
+  return {
+    rows: result.rows,
+    count: result.count,
+    limit,
+    offset,
+  };
+}

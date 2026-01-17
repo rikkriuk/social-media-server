@@ -7,6 +7,11 @@ export class CreateProfileDto {
   @IsString()
   name?: string;
 
+  @ApiProperty({ example: 'I like camping' })
+  @IsOptional()
+  @IsString()
+  bio?: string;
+
   @ApiProperty({ example: 'Jakarta' })
   @IsOptional()
   @IsString()

@@ -12,6 +12,8 @@ import { Post } from './modules/post/post.entity';
 import { Like } from './modules/like/like.entity';
 import { Comment } from './modules/comment/comment.entity';
 import { Notification } from './modules/notification/notification.entity';
+import { UserFollowModule } from './modules/userFollow/userFollow.module';
+import { UserFollow } from './modules/userFollow/userFollow.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -24,7 +26,16 @@ import { Notification } from './modules/notification/notification.entity';
       username: process.env.DB_USER || 'postgres',
       password: process.env.DB_PASS || 'postgres',
       database: process.env.DB_NAME || 'social_media',
-      models: [User, OtpCode, Profile, Post, Like, Comment, Notification],
+      models: [
+        User, 
+        OtpCode, 
+        Profile, 
+        Post, 
+        Like, 
+        Comment, 
+        Notification,
+        UserFollow,
+      ],
       autoLoadModels: true,
       synchronize: true,
     }),
@@ -32,6 +43,7 @@ import { Notification } from './modules/notification/notification.entity';
     UsersModule,
     ProfileModule,
     PostModule,
+    UserFollowModule,
   ],
 })
 export class AppModule {}

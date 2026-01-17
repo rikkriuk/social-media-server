@@ -5,6 +5,7 @@ import { User } from '../users/user.model';
 import { Op } from 'sequelize';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { paginatedResult } from '../../common/response.helper';
 
 @Injectable()
 export class ProfileService {
@@ -34,7 +35,7 @@ export class ProfileService {
     const limit = filter.limit || 50;
     const offset = filter.offset || 0;
     const result = await this.profileModel.findAndCountAll({ where, include: [userInclude], limit, offset });
-    return { rows: result.rows, count: result.count, limit, offset };
+    return paginatedResult(result, limit, offset);
   }
 
   async findOne(id: number) {

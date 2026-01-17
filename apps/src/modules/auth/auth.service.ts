@@ -121,7 +121,7 @@ export class AuthService {
       email: user.email,
     };
     const token = this.jwtService.sign(payload);
-    return { token };
+    return { token, profile, user };
   }
 
   async resendOtp(userId: string) {

@@ -1,6 +1,7 @@
-import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, CreatedAt, HasOne } from 'sequelize-typescript';
+import { Profile } from '../profile/profile.model';
 
-@Table({ tableName: 'users', timestamps: false, underscored: true })
+@Table({ tableName: 'users', timestamps: true, underscored: true })
 export class User extends Model {
   @Column({ primaryKey: true, type: DataType.UUID, defaultValue: DataType.UUIDV4 })
   id: string;
@@ -20,6 +21,10 @@ export class User extends Model {
   @Column({ field: 'is_verified', type: DataType.BOOLEAN, defaultValue: false })
   isVerified: boolean;
 
-  @Column({ field: 'created_at', type: DataType.DATE })
+  @CreatedAt
+  @Column({ field: 'created_at', type: DataType.DATE, defaultValue: DataType.NOW })
   createdAt: Date;
+
+  @HasOne(() => Profile)
+  profile: Profile;
 }

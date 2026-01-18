@@ -5,6 +5,7 @@ import { Op } from 'sequelize';
 import { UserFilterDto } from './dto/user-filter.dto';
 import { paginateResponse } from '../../common/response.helper';
 import { Request } from 'express';
+import { ApiParam } from '@nestjs/swagger';
 
 @Controller('users')
 export class UsersController {
@@ -26,6 +27,16 @@ export class UsersController {
       offset: off,
     });
     return paginateResponse(req as Request, rows, count, lim, off);
+  }
+
+  @Get(':userId')
+  @ApiParam({ name: 'userId', required: true, type: String })
+  async getUserById(@Param('userId') userId: string) {
+    const user = await this.userModel.findOne({
+      where: { id: userId },
+    })
+
+    return user;
   }
 
   @Delete(':userId')

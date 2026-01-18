@@ -38,11 +38,11 @@ export class ProfileService {
     return paginatedResult(result, limit, offset);
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     return this.profileModel.findByPk(id);
   }
 
-  async update(id: number, dto: UpdateProfileDto) {
+  async update(id: string, dto: UpdateProfileDto) {
     const p = await this.profileModel.findByPk(id);
     if (!p) return null;
     return p.update(dto);

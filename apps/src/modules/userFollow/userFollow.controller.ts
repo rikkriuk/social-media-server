@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Post } from "@nestjs/common";
-import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { UserFollowService } from "./userFollow.service";
 import { CreateFollowDto, CreateUnfollowDto } from "./userFollow.dto";
 
@@ -22,7 +22,8 @@ export class UserFollowController {
 
    @Get('count/:userId')
    @ApiOperation({ summary: 'Get follower and following count for a user' })
-   async count(@Body('userId') userId: string) {
+   @ApiParam({ name: 'userId', required: true, type: String })
+   async count(@Param('userId') userId: string) {
       return this.service.count(userId);
    }
 

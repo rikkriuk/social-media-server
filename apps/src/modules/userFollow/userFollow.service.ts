@@ -13,14 +13,16 @@ export class UserFollowService {
     @InjectModel(UserFollow) private userFollowModel: typeof UserFollow,
   ) {}
 
-  async count(userId: string): Promise<{ followers: number; following: number }> {
-    const [followers, following] = await Promise.all([
-      this.userFollowModel.count({ where: { followingId: userId } }),
-      this.userFollowModel.count({ where: { followerId: userId } }),
-    ]);
+   async count(userId: string): Promise<{ data: { followers: number; following: number } }> {
+      const [followers, following] = await Promise.all([
+         this.userFollowModel.count({ where: { followingId: userId } }),
+         this.userFollowModel.count({ where: { followerId: userId } }),
+      ]);
 
-    return { followers, following };
-  }
+      return { 
+         data: { followers, following }
+      };
+   }
 
    private async getFollowList(data: GetFollowersDto, type: FollowType) {
       const { userId, search, limit = 10, offset = 0 } = data;

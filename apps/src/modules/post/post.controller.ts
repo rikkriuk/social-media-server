@@ -43,14 +43,14 @@ export class PostController {
       return this.postService.getPosts(query.limit, query.offset);
    }
 
-   @Get('user/:userId')
+   @Get('user/:profileId')
    @ApiOperation({ summary: 'Get posts from a specific user' })
    @ApiResponse({ status: 200, description: 'User posts fetched' })
    async getUserPosts(
-      @Param('userId') userId: string,
+      @Param('profileId') profileId: string,
       @Query() query: PaginationQueryDto,
    ) {
-      return this.postService.getUserPosts(userId, query.limit, query.offset);
+      return this.postService.getUserPosts(profileId, query.limit, query.offset);
    }
 
    @Get(':id')

@@ -25,7 +25,7 @@ export class ProfileController {
   @Get(':id')
   @ApiOperation({ summary: 'Get profile by id' })
   async get(@Param('id') id: string) {
-    return this.service.findOne(parseInt(id, 10));
+    return this.service.findOne(id);
   }
 
   @Post()
@@ -37,7 +37,7 @@ export class ProfileController {
   @Patch(':id')
   @ApiOperation({ summary: 'Update profile (partial)' })
   async patch(@Param('id') id: string, @Body() dto: UpdateProfileDto) {
-    return this.service.update(parseInt(id, 10), dto);
+    return this.service.update(id, dto);
   }
 
   @Delete(':id')

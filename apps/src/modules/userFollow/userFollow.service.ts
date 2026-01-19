@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { UserFollow } from './userFollow.entity';
 import { InjectModel } from '@nestjs/sequelize';
-import { CreateFollowDto, FollowType, GetFollowersDto, GetFollowingDto } from './userFollow.dto';
+import { CreateFollowDto, FollowType, GetFollowersDto, GetFollowingDto, GetSuggestionsDto, SearchUsersDto } from './userFollow.dto';
 import { User } from '../users/user.model';
 import { Profile } from '../profile/profile.model';
 import { Op, WhereOptions } from 'sequelize';
@@ -9,9 +9,10 @@ import { paginatedResult } from '../../common/response.helper';
 
 @Injectable()
 export class UserFollowService {
-  constructor(
-    @InjectModel(UserFollow) private userFollowModel: typeof UserFollow,
-  ) {}
+   constructor(
+      @InjectModel(UserFollow) private userFollowModel: typeof UserFollow,
+      @InjectModel(User) private userModel: typeof User,
+   ) {}
 
    async count(userId: string): Promise<{ data: { followers: number; following: number } }> {
       const [followers, following] = await Promise.all([
@@ -28,22 +29,22 @@ export class UserFollowService {
       const { userId, search, limit = 10, offset = 0 } = data;
 
       const isFollowers = type === FollowType.FOLLOWERS;
-      const alias = isFollowers ? FollowType.FOLLOWERS : FollowType.FOLLOWING;
+      // Entity uses singular: 'follower' and 'following' as alias
+      const alias = isFollowers ? 'follower' : 'following';
       const whereField = isFollowers ? 'followingId' : 'followerId';
 
       const includeUser: any = {
          model: User,
          as: alias,
          attributes: ['id', 'username', 'email'],
-         include: [{ model: Profile, attributes: ['id', 'name'] }],
+         include: [{ model: Profile, attributes: ['id', 'name', 'bio'] }],
       };
 
       if (search) {
          includeUser.where = {
-         [Op.or]: [
-            { username: { [Op.iLike]: `%${search}%` } },
-            { [`$${alias}.profile.name$`]: { [Op.iLike]: `%${search}%` } },
-         ],
+            [Op.or]: [
+               { username: { [Op.iLike]: `%${search}%` } },
+            ],
          };
          includeUser.required = true;
       }
@@ -85,5 +86,89 @@ export class UserFollowService {
          },
       });
       return { message: "Successfully unfollowed the user." };
+   }
+
+   async getSuggestions(data: GetSuggestionsDto) {
+      const { userId, limit = 10, offset = 0 } = data;
+
+      const followingIds = await this.userFollowModel.findAll({
+         where: { followerId: userId },
+         attributes: ['followingId'],
+      });
+      const excludeIds = [userId, ...followingIds.map(f => f.followingId)];
+
+      const result = await this.userModel.findAndCountAll({
+         where: {
+            id: { [Op.notIn]: excludeIds },
+         },
+         attributes: ['id', 'username', 'email'],
+         include: [{
+            model: Profile,
+            attributes: ['id', 'name', 'bio'],
+         }],
+         limit,
+         offset,
+         order: [['createdAt', 'DESC']],
+      });
+
+      return paginatedResult(result, limit, offset);
+   }
+
+   async searchUsers(data: SearchUsersDto) {
+      const { search, currentUserId, limit = 10, offset = 0 } = data;
+
+      if (!search || search.trim() === '') {
+         return paginatedResult({ rows: [], count: 0 }, limit, offset);
+      }
+
+      const whereClause: any = {};
+
+      if (currentUserId) {
+         whereClause.id = { [Op.ne]: currentUserId };
+      }
+
+      whereClause[Op.or] = [
+         { username: { [Op.iLike]: `%${search}%` } },
+      ];
+
+      const result = await this.userModel.findAndCountAll({
+         where: whereClause,
+         attributes: ['id', 'username', 'email'],
+         include: [{
+            model: Profile,
+            attributes: ['id', 'name', 'bio'],
+         }],
+         limit,
+         offset,
+      });
+
+      const profileMatches = await this.userModel.findAndCountAll({
+         where: currentUserId ? { id: { [Op.ne]: currentUserId } } : {},
+         attributes: ['id', 'username', 'email'],
+         include: [{
+            model: Profile,
+            attributes: ['id', 'name', 'bio'],
+            where: { name: { [Op.iLike]: `%${search}%` } },
+            required: true,
+         }],
+         limit,
+         offset,
+      });
+
+      const existingIds = new Set(result.rows.map(u => u.id));
+      for (const user of profileMatches.rows) {
+         if (!existingIds.has(user.id)) {
+            result.rows.push(user);
+         }
+      }
+
+      return paginatedResult({ rows: result.rows, count: result.rows.length }, limit, offset);
+   }
+
+   async checkIsFollowing(followerId: string, followingId: string): Promise<{ isFollowing: boolean }> {
+      const follow = await this.userFollowModel.findOne({
+         where: { followerId, followingId },
+      });
+      return { isFollowing: !!follow };
    }
 }

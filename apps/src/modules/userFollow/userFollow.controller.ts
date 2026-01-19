@@ -1,13 +1,21 @@
-import { Body, Controller, Get, Param, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
 import { ApiOperation, ApiParam, ApiTags } from "@nestjs/swagger";
 import { UserFollowService } from "./userFollow.service";
-import { CreateFollowDto, CreateUnfollowDto } from "./userFollow.dto";
+import {
+   CreateFollowDto,
+   CreateUnfollowDto,
+   GetFollowersDto,
+   GetFollowingDto,
+   GetSuggestionsDto,
+   SearchUsersDto,
+   CheckFollowDto
+} from "./userFollow.dto";
 
 @ApiTags('User Follows')
 @Controller('user-follows')
 export class UserFollowController {
    constructor(private service: UserFollowService) {}
-   
+
    @Post('follow')
    @ApiOperation({ summary: 'Follow a user' })
    async followUser(@Body() body: CreateFollowDto) {
@@ -29,13 +37,31 @@ export class UserFollowController {
 
    @Get('followers')
    @ApiOperation({ summary: 'Get followers of a user' })
-   async getFollowers(@Body() body: any) {
-      return this.service.getFollowers(body);
+   async getFollowers(@Query() query: GetFollowersDto) {
+      return this.service.getFollowers(query);
    }
 
    @Get('following')
    @ApiOperation({ summary: 'Get following of a user' })
-   async getFollowing(@Body() body: any) {
-      return this.service.getFollowing(body);
+   async getFollowing(@Query() query: GetFollowingDto) {
+      return this.service.getFollowing(query);
+   }
+
+   @Get('suggestions')
+   @ApiOperation({ summary: 'Get suggested users to follow' })
+   async getSuggestions(@Query() query: GetSuggestionsDto) {
+      return this.service.getSuggestions(query);
+   }
+
+   @Get('search')
+   @ApiOperation({ summary: 'Search users by username or name' })
+   async searchUsers(@Query() query: SearchUsersDto) {
+      return this.service.searchUsers(query);
+   }
+
+   @Get('check')
+   @ApiOperation({ summary: 'Check if user is following another user' })
+   async checkIsFollowing(@Query() query: CheckFollowDto) {
+      return this.service.checkIsFollowing(query.followerId, query.followingId);
    }
 }

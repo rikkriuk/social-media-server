@@ -10,10 +10,12 @@ import { ConfigModule } from '@nestjs/config';
 import { PostModule } from './modules/post/post.module';
 import { Post } from './modules/post/post.entity';
 import { Like } from './modules/like/like.entity';
+import { LikeModule } from './modules/like/like.module';
 import { Comment } from './modules/comment/comment.entity';
 import { Notification } from './modules/notification/notification.entity';
 import { UserFollowModule } from './modules/userFollow/userFollow.module';
 import { UserFollow } from './modules/userFollow/userFollow.entity';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -27,12 +29,12 @@ import { UserFollow } from './modules/userFollow/userFollow.entity';
       password: process.env.DB_PASS || 'postgres',
       database: process.env.DB_NAME || 'social_media',
       models: [
-        User, 
-        OtpCode, 
-        Profile, 
-        Post, 
-        Like, 
-        Comment, 
+        User,
+        OtpCode,
+        Profile,
+        Post,
+        Like,
+        Comment,
         Notification,
         UserFollow,
       ],
@@ -43,6 +45,7 @@ import { UserFollow } from './modules/userFollow/userFollow.entity';
     UsersModule,
     ProfileModule,
     PostModule,
+    LikeModule,
     UserFollowModule,
   ],
 })

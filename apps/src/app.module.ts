@@ -16,6 +16,7 @@ import { Notification } from './modules/notification/notification.entity';
 import { UserFollowModule } from './modules/userFollow/userFollow.module';
 import { UserFollow } from './modules/userFollow/userFollow.entity';
 import { NotificationModule } from './modules/notification/notification.module';
+import { CommentModule } from './modules/comment/comment.module';
 
 @Module({
   imports: [
@@ -49,6 +50,7 @@ import { NotificationModule } from './modules/notification/notification.module';
     LikeModule,
     UserFollowModule,
     NotificationModule,
+    CommentModule,
   ],
 })
 export class AppModule {}

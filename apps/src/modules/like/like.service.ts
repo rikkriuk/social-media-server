@@ -5,12 +5,15 @@ import { Post } from '../post/post.entity';
 import { Profile } from '../profile/profile.model';
 import { CreateLikeDto, UnlikeDto, GetLikesDto, CheckLikeDto } from './like.dto';
 import { paginatedResult } from '../../common/response.helper';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class LikeService {
    constructor(
       @InjectModel(Like) private likeModel: typeof Like,
       @InjectModel(Post) private postModel: typeof Post,
+      @InjectModel(Profile) private profileModel: typeof Profile,
+      private notificationService: NotificationService,
    ) {}
 
    async likePost(data: CreateLikeDto): Promise<{ data: Like; likesCount: number }> {
@@ -32,6 +35,19 @@ export class LikeService {
       });
 
       const post = await this.postModel.findByPk(postId);
+      
+      if (post?.profileId && post.profileId !== profileId) {
+         try {
+            await this.notificationService.create({
+               recipientProfileId: post.profileId,
+               actorProfileId: profileId,
+               type: 'like',
+               postId: postId,
+            });
+         } catch (error) {
+            console.error('Failed to create notification:', error);
+         }
+      }
 
       return {
          data: like,

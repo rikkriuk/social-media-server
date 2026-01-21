@@ -6,12 +6,15 @@ import { User } from '../users/user.model';
 import { Profile } from '../profile/profile.model';
 import { Op, WhereOptions } from 'sequelize';
 import { paginatedResult } from '../../common/response.helper';
+import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
 export class UserFollowService {
    constructor(
       @InjectModel(UserFollow) private userFollowModel: typeof UserFollow,
       @InjectModel(User) private userModel: typeof User,
+      @InjectModel(Profile) private profileModel: typeof Profile,
+      private notificationService: NotificationService,
    ) {}
 
    async count(userId: string): Promise<{ data: { followers: number; following: number } }> {
@@ -73,6 +76,26 @@ export class UserFollowService {
          followerId,
          followingId,
       })
+
+      try {
+         const followerUser = await this.userModel.findByPk(followerId, {
+            include: [Profile],
+         });
+         
+         const followingUser = await this.userModel.findByPk(followingId, {
+            include: [Profile],
+         });
+
+         if (followerUser?.profile?.id && followingUser?.profile?.id) {
+            await this.notificationService.create({
+               recipientProfileId: followingUser.profile.id,
+               actorProfileId: followerUser.profile.id,
+               type: 'follow',
+            });
+         }
+      } catch (error) {
+         console.error('Failed to create follow notification:', error);
+      }
 
       return { data: result };
    }

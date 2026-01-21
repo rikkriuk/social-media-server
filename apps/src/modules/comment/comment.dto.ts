@@ -1,17 +1,23 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsUUID, IsOptional } from 'class-validator';
 
 export class CreateCommentDto {
    @ApiProperty({
       description: 'Post ID that this comment belongs to',
       example: 'uuid-here',
    })
+   @IsUUID()
    postId: string;
 
    @ApiProperty({
       description: 'Content of the comment',
       example: 'Great post!',
    })
+   @IsString()
    content: string;
+
+   @IsOptional()
+   profileId?: string;
 }
 
 export class UpdateCommentDto {
@@ -19,6 +25,8 @@ export class UpdateCommentDto {
       description: 'Content of the comment',
       example: 'Updated comment',
    })
+   @IsOptional()
+   @IsString()
    content?: string;
 }
 

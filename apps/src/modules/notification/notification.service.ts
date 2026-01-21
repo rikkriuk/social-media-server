@@ -30,7 +30,7 @@ export class NotificationService {
             }
          }
 
-         const notification = await this.notificationModel.create(dto);
+         const notification = await this.notificationModel.create(dto as any);
          return this.toResponseDto(await notification.reload({
             include: ['actor', 'post', 'comment'],
          }));

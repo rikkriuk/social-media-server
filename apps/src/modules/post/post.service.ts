@@ -2,6 +2,7 @@ import { Injectable, BadRequestException, NotFoundException } from '@nestjs/comm
 import { InjectModel } from '@nestjs/sequelize';
 import { Post } from './post.entity';
 import { CreatePostDto, UpdatePostDto } from './post.dto';
+import { paginateResponse } from 'apps/src/common/response.helper';
 
 @Injectable()
 export class PostService {
@@ -41,12 +42,7 @@ export class PostService {
             ],
          });
 
-         return {
-            data: rows,
-            total: count,
-            limit,
-            offset,
-         };
+         return paginateResponse(rows, count, limit, offset);
       } catch (error) {
          throw new BadRequestException('Failed to fetch posts');
       }
@@ -97,12 +93,7 @@ export class PostService {
             ],
          });
 
-         return {
-            data: rows,
-            total: count,
-            limit,
-            offset,
-         };
+         return paginateResponse(rows, count, limit, offset);
       } catch (error) {
          throw new BadRequestException('Failed to fetch user posts');
       }

@@ -3,7 +3,7 @@ import { User } from '../users/user.model';
 
 @Table({ tableName: 'profile', timestamps: true, underscored: true })
 export class Profile extends Model {
-  @Column({ primaryKey: true, autoIncrement: true, type: DataType.UUID, defaultValue: DataType.UUIDV4 })
+  @Column({ primaryKey: true, type: DataType.UUID, defaultValue: DataType.UUIDV4 })
   id: string;
 
   @ForeignKey(() => User)

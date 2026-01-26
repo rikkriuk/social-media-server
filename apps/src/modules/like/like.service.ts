@@ -4,7 +4,7 @@ import { Like } from './like.entity';
 import { Post } from '../post/post.entity';
 import { Profile } from '../profile/profile.model';
 import { CreateLikeDto, UnlikeDto, GetLikesDto, CheckLikeDto } from './like.dto';
-import { paginatedResult } from '../../common/response.helper';
+import { paginateResponse } from '../../common/response.helper';
 import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
@@ -92,7 +92,7 @@ export class LikeService {
          order: [['createdAt', 'DESC']],
       });
 
-      return paginatedResult(result, limit, offset);
+      return paginateResponse(result.rows, result.count, limit, offset);
    }
 
    async checkLike(data: CheckLikeDto): Promise<{ isLiked: boolean }> {

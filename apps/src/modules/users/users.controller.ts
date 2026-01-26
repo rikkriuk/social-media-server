@@ -1,10 +1,9 @@
-import { Controller, Get, Delete, Param, HttpCode, HttpStatus, Query, Req } from '@nestjs/common';
+import { Controller, Get, Delete, Param, HttpCode, HttpStatus, Query } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from './user.model';
 import { Op } from 'sequelize';
 import { UserFilterDto } from './dto/user-filter.dto';
 import { paginateResponse } from '../../common/response.helper';
-import { Request } from 'express';
 import { ApiParam } from '@nestjs/swagger';
 
 @Controller('users')
@@ -12,7 +11,7 @@ export class UsersController {
   constructor(@InjectModel(User) private userModel: typeof User) {}
 
   @Get()
-  async list(@Req() req: Request, @Query() filter: UserFilterDto) {
+  async list(@Query() filter: UserFilterDto) {
     const where: any = {};
     if (filter.username) where.username = { [Op.iLike]: `%${filter.username}%` };
     if (filter.email) where.email = { [Op.iLike]: `%${filter.email}%` };
@@ -26,7 +25,7 @@ export class UsersController {
       limit: lim,
       offset: off,
     });
-    return paginateResponse(req as Request, rows, count, lim, off);
+    return paginateResponse(rows, count, lim, off);
   }
 
   @Get(':userId')

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Notification } from './notification.entity';
 import { CreateNotificationDto, NotificationResponseDto, GetNotificationsDto, GetReadNotificationsDto } from './notification.dto';
-import { paginatedResult } from '../../common/response.helper';
+import { paginateResponse } from '../../common/response.helper';
 
 @Injectable()
 export class NotificationService {
@@ -51,8 +51,9 @@ export class NotificationService {
             offset,
          });
 
-         return paginatedResult(
-            { rows: rows.map(n => this.toResponseDto(n)), count },
+         return paginateResponse(
+            rows.map(n => this.toResponseDto(n)),
+            count,
             limit,
             offset,
          );
@@ -93,8 +94,9 @@ export class NotificationService {
             offset,
          });
 
-         return paginatedResult(
-            { rows: rows.map(n => this.toResponseDto(n)), count },
+         return paginateResponse(
+            rows.map(n => this.toResponseDto(n)),
+            count,
             limit,
             offset,
          );

@@ -39,17 +39,20 @@ export class ProfileService {
   }
 
   async findOne(id: string) {
-    return this.profileModel.findByPk(id);
+    return this.profileModel.findOne({
+      where: { id },
+      include: [{ model: User, attributes: ['id', 'username', 'email'] }],
+    });
   }
 
   async update(id: string, dto: UpdateProfileDto) {
-    const p = await this.profileModel.findByPk(id);
+    const p = await this.profileModel.findOne({ where: { id } });
     if (!p) return null;
     return p.update(dto);
   }
 
   async remove(id: number) {
-    const p = await this.profileModel.findByPk(id);
+    const p = await this.profileModel.findOne({ where: { id } });
     if (!p) return null;
     await p.destroy();
     return { success: true };

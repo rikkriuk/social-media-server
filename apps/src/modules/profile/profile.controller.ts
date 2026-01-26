@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Req } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Req, HttpException, HttpStatus } from '@nestjs/common';
 import { ProfileService } from './profile.service';
 import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ProfileFilterDto } from './dto/profile-filter.dto';
-import { paginateResponse } from '../../common/response.helper';
+import { paginateResponse, singleResponse } from '../../common/response.helper';
 import { Request } from 'express';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ApiProfileQuery } from './dto/profile-filter.dto';
@@ -25,24 +25,37 @@ export class ProfileController {
   @Get(':id')
   @ApiOperation({ summary: 'Get profile by id' })
   async get(@Param('id') id: string) {
-    return this.service.findOne(id);
+    const profile = await this.service.findOne(id);
+    if (!profile) {
+      throw new HttpException('Profile not found', HttpStatus.NOT_FOUND);
+    }
+    return singleResponse(profile);
   }
 
   @Post()
   @ApiOperation({ summary: 'Create profile for user' })
   async create(@Body() dto: CreateProfileDto) {
-    return this.service.create((dto as any).userId, dto as CreateProfileDto);
+    const profile = await this.service.create((dto as any).userId, dto as CreateProfileDto);
+    return singleResponse(profile);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Update profile (partial)' })
   async patch(@Param('id') id: string, @Body() dto: UpdateProfileDto) {
-    return this.service.update(id, dto);
+    const profile = await this.service.update(id, dto);
+    if (!profile) {
+      throw new HttpException('Profile not found', HttpStatus.NOT_FOUND);
+    }
+    return singleResponse(profile);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete profile' })
   async delete(@Param('id') id: string) {
-    return this.service.remove(parseInt(id, 10));
+    const result = await this.service.remove(parseInt(id, 10));
+    if (!result) {
+      throw new HttpException('Profile not found', HttpStatus.NOT_FOUND);
+    }
+    return singleResponse(result);
   }
 }

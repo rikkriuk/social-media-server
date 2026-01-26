@@ -5,7 +5,7 @@ import { CreateFollowDto, FollowType, GetFollowersDto, GetFollowingDto, GetSugge
 import { User } from '../users/user.model';
 import { Profile } from '../profile/profile.model';
 import { Op, WhereOptions } from 'sequelize';
-import { paginatedResult } from '../../common/response.helper';
+import { paginateResponse } from '../../common/response.helper';
 import { NotificationService } from '../notification/notification.service';
 
 @Injectable()
@@ -59,7 +59,7 @@ export class UserFollowService {
          offset,
       });
 
-      return paginatedResult(result, limit, offset);
+      return paginateResponse(result.rows, result.count, limit, offset);
    }
 
    async getFollowers(data: GetFollowersDto) {
@@ -134,14 +134,14 @@ export class UserFollowService {
          order: [['createdAt', 'DESC']],
       });
 
-      return paginatedResult(result, limit, offset);
+      return paginateResponse(result.rows, result.count, limit, offset);
    }
 
    async searchUsers(data: SearchUsersDto) {
       const { search, currentUserId, limit = 10, offset = 0 } = data;
 
       if (!search || search.trim() === '') {
-         return paginatedResult({ rows: [], count: 0 }, limit, offset);
+         return paginateResponse([], 0, limit, offset);
       }
 
       const whereClause: any = {};
@@ -185,7 +185,7 @@ export class UserFollowService {
          }
       }
 
-      return paginatedResult({ rows: result.rows, count: result.rows.length }, limit, offset);
+      return paginateResponse(result.rows, result.rows.length, limit, offset);
    }
 
    async checkIsFollowing(followerId: string, followingId: string): Promise<{ isFollowing: boolean }> {

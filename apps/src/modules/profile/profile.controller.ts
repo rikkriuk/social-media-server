@@ -4,7 +4,6 @@ import { CreateProfileDto } from './dto/create-profile.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ProfileFilterDto } from './dto/profile-filter.dto';
 import { paginateResponse, singleResponse } from '../../common/response.helper';
-import { Request } from 'express';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { ApiProfileQuery } from './dto/profile-filter.dto';
 
@@ -16,10 +15,10 @@ export class ProfileController {
   @Get()
   @ApiOperation({ summary: 'List profiles (filter by userId or name)' })
   @ApiProfileQuery()
-  async list(@Req() req: Request, @Query() filter: ProfileFilterDto) {
+  async list(@Query() filter: ProfileFilterDto) {
     const result = (await this.service.findAll(filter as any, true)) as any;
-    const { rows, count, limit, offset } = result;
-    return paginateResponse(req, rows, count, limit || 50, offset || 0);
+    const { count, results, limit, offset } = result.payload;
+    return paginateResponse(results, count, limit, offset);
   }
 
   @Get(':id')

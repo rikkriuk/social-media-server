@@ -23,6 +23,9 @@ export class Profile extends Model {
   website: string;
 
   @Column({ type: DataType.STRING })
+  profileImage: string;
+
+  @Column({ type: DataType.STRING })
   gender: string;
 
   @CreatedAt

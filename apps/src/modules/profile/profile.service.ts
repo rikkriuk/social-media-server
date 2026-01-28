@@ -57,4 +57,10 @@ export class ProfileService {
     await p.destroy();
     return { success: true };
   }
+
+  async updateProfileImage(id: string, filename: string) {
+    const profile = await this.profileModel.findOne({ where: { id } });
+    if (!profile) return null;
+    return profile.update({ profileImage: filename });
+  }
 }

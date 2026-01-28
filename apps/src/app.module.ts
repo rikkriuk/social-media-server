@@ -17,6 +17,7 @@ import { UserFollowModule } from './modules/userFollow/userFollow.module';
 import { UserFollow } from './modules/userFollow/userFollow.entity';
 import { NotificationModule } from './modules/notification/notification.module';
 import { CommentModule } from './modules/comment/comment.module';
+import { UploadModule } from './modules/upload/upload.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { CommentModule } from './modules/comment/comment.module';
     UserFollowModule,
     NotificationModule,
     CommentModule,
+    UploadModule
   ],
 })
 export class AppModule {}

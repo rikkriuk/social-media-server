@@ -3,13 +3,13 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
-    queryInterface.addColumn('profile', 'bio', {
+    await queryInterface.addColumn('profile', 'bio', {
       type: Sequelize.TEXT,
       allowNull: true,
-    })
+    }).catch(() => {});
   },
 
   async down (queryInterface, Sequelize) {
-    queryInterface.removeColumn('profile', 'bio');
+    await queryInterface.removeColumn('profile', 'bio').catch(() => {});
   }
 };

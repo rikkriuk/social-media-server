@@ -18,7 +18,10 @@ export class UploadController {
 
   @Post('image')
   @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
+  @UseInterceptors(FileInterceptor('file', {
+    storage: new UploadService().getMulterStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 },
+  }))
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload image file' })
@@ -31,12 +34,11 @@ export class UploadController {
     const allowedMimes = [
       'image/jpeg',
       'image/png',
-      'image/gif',
       'image/webp',
     ];
 
     if (!allowedMimes.includes(file.mimetype)) {
-      throw new BadRequestException('Only image files are allowed (jpeg, png, gif, webp)');
+      throw new BadRequestException('Only image files are allowed (jpeg, png, webp)');
     }
 
     const fileUrl = this.uploadService.generateFileUrl(file.filename);
@@ -55,7 +57,10 @@ export class UploadController {
 
   @Post('video')
   @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 100 * 1024 * 1024 } }))
+  @UseInterceptors(FileInterceptor('file', {
+    storage: new UploadService().getMulterStorage(),
+    limits: { fileSize: 100 * 1024 * 1024 },
+  }))
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload video file' })

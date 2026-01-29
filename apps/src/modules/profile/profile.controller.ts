@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Req, HttpException, HttpStatus, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Request, HttpException, HttpStatus, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from '@nestjs/passport';
 import { ProfileService } from './profile.service';
@@ -38,9 +38,12 @@ export class ProfileController {
   }
 
   @Post()
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create profile for user' })
-  async create(@Body() dto: CreateProfileDto) {
-    const profile = await this.service.create((dto as any).userId, dto as CreateProfileDto);
+  async create(@Request() req: any, @Body() dto: CreateProfileDto) {
+    const userId = req.user.userId;
+    const profile = await this.service.create(userId, dto);
     return singleResponse(profile);
   }
 
@@ -66,7 +69,10 @@ export class ProfileController {
 
   @Post(':id/upload-image')
   @UseGuards(AuthGuard('jwt'))
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 10 * 1024 * 1024 } }))
+  @UseInterceptors(FileInterceptor('file', {
+    storage: new UploadService().getMulterStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 },
+  }))
   @ApiBearerAuth()
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload profile image' })

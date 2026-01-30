@@ -11,7 +11,15 @@ import { paginateResponse } from '../../common/response.helper';
 export class ProfileService {
   constructor(@InjectModel(Profile) private profileModel: typeof Profile) {}
 
+  async findByUserId(userId: string) {
+    return this.profileModel.findOne({ where: { userId } });
+  }
+
   async create(userId: string, dto: CreateProfileDto) {
+    const existing = await this.findByUserId(userId);
+    if (existing) {
+      throw new Error('PROFILE_ALREADY_EXISTS');
+    }
     return this.profileModel.create({ userId, ...dto });
   }
 
@@ -62,5 +70,11 @@ export class ProfileService {
     const profile = await this.profileModel.findOne({ where: { id } });
     if (!profile) return null;
     return profile.update({ profileImage: filename });
+  }
+
+  async updateCoverImage(id: string, filename: string) {
+    const profile = await this.profileModel.findOne({ where: { id } });
+    if (!profile) return null;
+    return profile.update({ coverImage: filename });
   }
 }

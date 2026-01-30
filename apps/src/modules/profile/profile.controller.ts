@@ -43,8 +43,15 @@ export class ProfileController {
   @ApiOperation({ summary: 'Create profile for user' })
   async create(@Request() req: any, @Body() dto: CreateProfileDto) {
     const userId = req.user.userId;
-    const profile = await this.service.create(userId, dto);
-    return singleResponse(profile);
+    try {
+      const profile = await this.service.create(userId, dto);
+      return singleResponse(profile);
+    } catch (error: any) {
+      if (error.message === 'PROFILE_ALREADY_EXISTS') {
+        throw new HttpException('User already has a profile', HttpStatus.CONFLICT);
+      }
+      throw error;
+    }
   }
 
   @Patch(':id')
@@ -95,6 +102,41 @@ export class ProfileController {
 
     const fileUrl = this.uploadService.generateFileUrl(file.filename);
     const profile = await this.service.updateProfileImage(profileId, file.filename);
+
+    if (!profile) {
+      throw new HttpException('Profile not found', HttpStatus.NOT_FOUND);
+    }
+
+    return singleResponse(profile);
+  }
+
+  @Post(':id/upload-cover')
+  @UseGuards(AuthGuard('jwt'))
+  @UseInterceptors(FileInterceptor('file', {
+    storage: new UploadService().getMulterStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 },
+  }))
+  @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ summary: 'Upload cover image' })
+  @ApiResponse({ status: 201, description: 'Cover image uploaded' })
+  async uploadCoverImage(
+    @Param('id') profileId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new HttpException('No file provided', HttpStatus.BAD_REQUEST);
+    }
+
+    const allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedMimes.includes(file.mimetype)) {
+      throw new HttpException(
+        'Only image files are allowed (jpeg, png, gif, webp)',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const profile = await this.service.updateCoverImage(profileId, file.filename);
 
     if (!profile) {
       throw new HttpException('Profile not found', HttpStatus.NOT_FOUND);

@@ -57,7 +57,7 @@ export class CommentService {
             include: [
                {
                   model: Profile,
-                  attributes: ['id', 'name', 'avatar'],
+                  attributes: ['id', 'name', 'profileImage'],
                },
             ],
             order: [['createdAt', 'DESC']],

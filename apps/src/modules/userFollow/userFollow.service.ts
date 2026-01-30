@@ -40,7 +40,7 @@ export class UserFollowService {
          model: User,
          as: alias,
          attributes: ['id', 'username', 'email'],
-         include: [{ model: Profile, attributes: ['id', 'name', 'bio'] }],
+         include: [{ model: Profile, attributes: ['id', 'name', 'bio', 'profileImage'] }],
       };
 
       if (search) {
@@ -127,7 +127,7 @@ export class UserFollowService {
          attributes: ['id', 'username', 'email'],
          include: [{
             model: Profile,
-            attributes: ['id', 'name', 'bio'],
+            attributes: ['id', 'name', 'bio', 'profileImage'],
          }],
          limit,
          offset,
@@ -159,7 +159,7 @@ export class UserFollowService {
          attributes: ['id', 'username', 'email'],
          include: [{
             model: Profile,
-            attributes: ['id', 'name', 'bio'],
+            attributes: ['id', 'name', 'bio', 'profileImage'],
          }],
          limit,
          offset,
@@ -170,7 +170,7 @@ export class UserFollowService {
          attributes: ['id', 'username', 'email'],
          include: [{
             model: Profile,
-            attributes: ['id', 'name', 'bio'],
+            attributes: ['id', 'name', 'bio', 'profileImage'],
             where: { name: { [Op.iLike]: `%${search}%` } },
             required: true,
          }],

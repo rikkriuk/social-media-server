@@ -20,15 +20,23 @@ export class CommentService {
 
    async createComment(dto: CreateCommentDto): Promise<Comment> {
       try {
+         if (dto.parentId) {
+            const parent = await this.commentModel.findByPk(dto.parentId);
+            if (!parent) {
+               throw new Error('Parent comment not found');
+            }
+            if (parent.parentId !== null) {
+               throw new Error('Cannot reply to a reply');
+            }
+         }
+
          const comment = await this.commentModel.create(dto as any);
 
-         // Increment comment count on post
          await this.postModel.increment('commentsCount', {
             by: 1,
             where: { id: dto.postId },
          });
 
-         // Get post and create notification
          const post = await this.postModel.findByPk(dto.postId);
          if (post && post.profileId !== dto.profileId) {
             try {
@@ -53,11 +61,22 @@ export class CommentService {
    async getCommentsByPost(postId: string, limit: number = 10, offset: number = 0) {
       try {
          const { rows, count } = await this.commentModel.findAndCountAll({
-            where: { postId },
+            where: { postId, parentId: null },
             include: [
                {
                   model: Profile,
                   attributes: ['id', 'name', 'profileImage'],
+               },
+               {
+                  model: Comment,
+                  as: 'replies',
+                  include: [
+                     {
+                        model: Profile,
+                        attributes: ['id', 'name', 'profileImage'],
+                     },
+                  ],
+                  order: [['createdAt', 'ASC']],
                },
             ],
             order: [['createdAt', 'DESC']],
@@ -83,13 +102,20 @@ export class CommentService {
             throw new Error('Unauthorized or comment not found');
          }
 
+         let decrementBy = 1;
+         if (comment.parentId === null) {
+            const replyCount = await this.commentModel.count({
+               where: { parentId: commentId },
+            });
+            decrementBy += replyCount;
+         }
+
          await this.commentModel.destroy({
             where: { id: commentId },
          });
 
-         // Decrement comment count
          await this.postModel.decrement('commentsCount', {
-            by: 1,
+            by: decrementBy,
             where: { id: comment.postId },
          });
       } catch (error) {

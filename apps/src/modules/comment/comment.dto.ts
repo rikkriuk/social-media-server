@@ -18,6 +18,14 @@ export class CreateCommentDto {
 
    @IsOptional()
    profileId?: string;
+
+   @ApiPropertyOptional({
+      description: 'Parent comment ID for replies (1 level only)',
+      example: 'uuid-here',
+   })
+   @IsOptional()
+   @IsUUID()
+   parentId?: string | null;
 }
 
 export class UpdateCommentDto {

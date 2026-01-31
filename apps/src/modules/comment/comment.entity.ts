@@ -5,6 +5,7 @@ import {
    DataType,
    ForeignKey,
    BelongsTo,
+   HasMany,
    CreatedAt,
    UpdatedAt,
 } from 'sequelize-typescript';
@@ -43,6 +44,20 @@ export class Comment extends Model {
 
    @BelongsTo(() => Profile)
    profile: Profile;
+
+   @ForeignKey(() => Comment)
+   @Column({
+      type: DataType.UUID,
+      allowNull: true,
+      defaultValue: null,
+   })
+   parentId: string | null;
+
+   @BelongsTo(() => Comment, { foreignKey: 'parentId', as: 'parent' })
+   parent: Comment;
+
+   @HasMany(() => Comment, { foreignKey: 'parentId', as: 'replies' })
+   replies: Comment[];
 
    @Column({
       type: DataType.TEXT,
